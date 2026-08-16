@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chess Repertoire Study Guide Pro</title>
+<title>Chess Repertoire Study Guide</title>
 <style>
 :root {
   --bg: #0f0f1a;
@@ -392,7 +392,7 @@ nav button.active { background: var(--accent); color: white; border-color: var(-
 <body>
 
 <header>
-  <h1>♟️ Chess Repertoire Study Guide Pro</h1>
+  <h1>♟️ Chess Repertoire Study Guide</h1>
   <p>Attack-first repertoire · Position training · Move recall · Mobile study mode</p>
 </header>
 
@@ -1111,8 +1111,6 @@ function init() {
   buildStudyGuide();
   updateView('white');
   updateView('black');
-  nextFlashcard();
-
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1122,14 +1120,27 @@ function init() {
     });
   });
 
+  // Keyboard navigation: only intercept the keys used by the repertoire board.
+  // Do not steal arrows while the user is typing in a form control.
   document.addEventListener('keydown', (e) => {
-    const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
+    const active = document.activeElement;
+    const typing = active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.tagName === 'SELECT' || active.isContentEditable);
+    if (typing) return;
+
+    const activeBtn = document.querySelector('.tab-btn.active');
+    const activeTab = activeBtn ? activeBtn.dataset.tab : '';
     if (activeTab !== 'white' && activeTab !== 'black') return;
-    if (e.key === 'ArrowRight') navMove(activeTab, 'next');
-    if (e.key === 'ArrowLeft') navMove(activeTab, 'prev');
-    if (e.key === 'Home') navMove(activeTab, 'first');
-    if (e.key === 'End') navMove(activeTab, 'last');
-  });
+
+    let direction = null;
+    if (e.key === 'ArrowRight') direction = 'next';
+    else if (e.key === 'ArrowLeft') direction = 'prev';
+    else if (e.key === 'Home') direction = 'first';
+    else if (e.key === 'End') direction = 'last';
+    else return;
+
+    e.preventDefault();
+    navMove(activeTab, direction);
+  }, { passive: false });
 }
 
 function buildSidebar(color) {
@@ -1296,35 +1307,6 @@ function copyPgn(color) {
   });
 }
 
-// Flashcard System
-let currentFlashcard = null;
-
-function nextFlashcard() {
-  const color = Math.random() > 0.5 ? 'white' : 'black';
-  const op = repertoire[color][Math.floor(Math.random() * repertoire[color].length)];
-  const variation = op.variations[Math.floor(Math.random() * op.variations.length)];
-  currentFlashcard = { color, op, variation };
-  
-  const board = getBoardAtMoves(variation.moves, variation.moves.length);
-  renderBoard('flashcard-board', board, variation.moves[variation.moves.length - 1], color);
-  renderSvgOverlays('flashcard-board-svg', variation.moves[variation.moves.length - 1], color);
-  
-  document.getElementById('flashcard-question').textContent = `You are playing ${color === 'white' ? 'White' : 'Black'}. What is your primary plan here?`;
-  document.getElementById('flashcard-answer').classList.remove('visible');
-  document.getElementById('flashcard-answer').innerHTML = '';
-}
-
-function revealFlashcard() {
-  if (!currentFlashcard) return;
-  const ansEl = document.getElementById('flashcard-answer');
-  ansEl.innerHTML = `
-    <h3>${currentFlashcard.op.icon} ${currentFlashcard.op.name} — ${currentFlashcard.variation.name}</h3>
-    <p><strong>Core Concept:</strong> ${currentFlashcard.op.concept}</p>
-    <p><strong>Plan:</strong> ${currentFlashcard.variation.plan}</p>
-  `;
-  ansEl.classList.add('visible');
-}
-
 function copyCurrentFen(color){
   const s=state[color], op=getOpening(color,s.openingId), v=getVariation(color,s.openingId,s.variationId);
   const board=getBoardAtMoves(v.moves,s.moveIdx);
@@ -1334,7 +1316,14 @@ function copyCurrentFen(color){
 }
 
 let trainingMode='move', trainingCard=null;
-let trainingStats=JSON.parse(localStorage.getItem('repertoireTrainingStats')||'{"correct":0,"attempts":0}');
+let trainingStats = (() => {
+  try {
+    const saved = JSON.parse(localStorage.getItem('repertoireTrainingStats') || '{\"correct\":0,\"attempts\":0}');
+    return { correct: Number(saved.correct) || 0, attempts: Number(saved.attempts) || 0 };
+  } catch (_) {
+    return { correct: 0, attempts: 0 };
+  }
+})();
 function saveTrainingStats(){localStorage.setItem('repertoireTrainingStats',JSON.stringify(trainingStats));updateTrainingStats()}
 function updateTrainingStats(){const pct=trainingStats.attempts?Math.round(trainingStats.correct/trainingStats.attempts*100):0;document.getElementById('train-score').textContent=pct+'%';document.getElementById('train-stats').textContent=`${trainingStats.correct} correct · ${trainingStats.attempts} attempts`}
 function allTrainingCards(){const a=[];['white','black'].forEach(color=>repertoire[color].forEach(op=>op.variations.forEach(v=>a.push({color,op,v}))));return a}
