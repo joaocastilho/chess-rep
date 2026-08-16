@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chess Repertoire Study Guide</title>
+<style>
+:root {
+  --bg: #0f0f1a;
+  --surface: #1a1a2e;
+  --card: #16213e;
+  --accent: #e94560;
+  --accent-2: #0f3460;
+  --text: #e0e0e0;
+  --text-muted: #8892b0;
+  --board-light: #eeeed2;
+  --board-dark: #769656;
+  --highlight: rgba(255, 235, 59, 0.5);
+  --last-move: rgba(155, 199, 0, 0.5);
+  --border: #2a2a4a;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+header {
+  background: linear-gradient(135deg, var(--surface), var(--accent-2));
+  padding: 20px 30px;
+  border-bottom: 3px solid var(--accent);
+  text-align: center;
+}
+header h1 { font-size: 1.8rem; margin-bottom: 4px; }
+header p { color: var(--text-muted); font-size: 0.95rem; }
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 15px;
+  background: var(--surface);
+  flex-wrap: wrap;
+}
+nav button {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 10px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+nav button:hover { border-color: var(--accent); color: var(--text); }
+nav button.active { background: var(--accent); color: white; border-color: var(--accent); }
+.tab-content { display: none; padding: 20px; max-width: 1400px; margin: 0 auto; }
+.tab-content.active { display: block; }
+.opening-layout { display: flex; gap: 20px; flex-wrap: wrap; }
+.sidebar { flex: 1; min-width: 220px; max-width: 280px; }
+.sidebar h3 { font-size: 1.1rem; margin-bottom: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+.opening-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.95rem;
+}
+.opening-btn:hover { border-color: var(--accent); background: var(--card); }
+.opening-btn.active { background: var(--accent-2); border-color: var(--accent); }
+.opening-btn .icon { margin-right: 8px; }
+.opening-btn .desc { display: block; font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+.main-area { flex: 3; min-width: 300px; }
+.board-wrapper { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.chessboard-container {
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 1;
+  position: relative;
+}
+.chessboard {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.square {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-size: clamp(20px, 5vw, 40px);
+  cursor: default;
+  user-select: none;
+}
+.square.light { background: var(--board-light); }
+.square.dark { background: var(--board-dark); }
+.square.highlight { box-shadow: inset 0 0 0 4px var(--highlight); }
+.square.last-move { box-shadow: inset 0 0 0 4px var(--last-move); }
+.piece { line-height: 1; pointer-events: none; }
+.white-piece {
+  color: #ffffff;
+  text-shadow: 0 0 2px #000, 0 0 2px #000, 0 0 3px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.3);
+}
+.black-piece {
+  color: #1a1a1a;
+  text-shadow: 0 0 1px rgba(255,255,255,0.3), 0 1px 2px rgba(0,0,0,0.2);
+}
+.coord { position: absolute; font-size: 0.65rem; font-weight: 700; opacity: 0.6; pointer-events: none; }
+.coord.file { bottom: 1px; right: 3px; }
+.coord.rank { top: 1px; left: 3px; }
+.square.light .coord { color: var(--board-dark); }
+.square.dark .coord { color: var(--board-light); }
+.controls { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.controls button {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+.controls button:hover { background: var(--accent-2); border-color: var(--accent); }
+.info-panel { margin-top: 16px; background: var(--surface); border-radius: 10px; padding: 16px; border: 1px solid var(--border); }
+.info-panel h3 { color: var(--accent); font-size: 1.1rem; margin-bottom: 8px; }
+.variations { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.variation-btn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+.variation-btn:hover { border-color: var(--accent); color: var(--text); }
+.variation-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+.move-list {
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 12px 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  max-height: 150px;
+  overflow-y: auto;
+}
+.move-number { color: var(--text-muted); padding: 3px 2px; }
+.move-cell {
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.move-cell:hover { background: rgba(255,255,255,0.1); }
+.move-cell.current { background: var(--accent); color: white; }
+.annotation {
+  background: var(--card);
+  border-left: 4px solid var(--accent);
+  padding: 12px 16px;
+  border-radius: 0 8px 8px 0;
+  margin-top: 12px;
+  font-size: 0.92rem;
+}
+.annotation strong { color: var(--accent); }
+.concept-box {
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.concept-box strong { color: var(--text); }
+.concept-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: border-color 0.2s;
+}
+.concept-card:hover { border-color: var(--accent); }
+.concept-card h3 { color: var(--accent); font-size: 1.15rem; margin-bottom: 8px; }
+.concept-card .applies { display: inline-block; background: var(--accent-2); color: var(--text); padding: 2px 10px; border-radius: 12px; font-size: 0.78rem; margin-bottom: 10px; }
+.concept-card .section { margin-top: 10px; }
+.concept-card .label { color: var(--accent); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.concept-card .rule { background: var(--bg); padding: 10px 14px; border-radius: 6px; margin-top: 8px; border-left: 3px solid var(--accent); }
+.study-step {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+}
+.study-step .step-num {
+  background: var(--accent);
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.study-step h3 { color: var(--text); margin-bottom: 6px; }
+.study-step p { color: var(--text-muted); font-size: 0.92rem; }
+.checklist { background: var(--surface); border-radius: 12px; padding: 20px; margin-top: 20px; border: 1px solid var(--border); }
+.checklist h3 { color: var(--accent); margin-bottom: 12px; }
+.checklist li { list-style: none; padding: 6px 0; padding-left: 24px; position: relative; }
+.checklist li::before { content: '☐'; position: absolute; left: 0; font-size: 1.2rem; color: var(--accent); }
+.concepts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 16px; }
+.section-title { font-size: 1.3rem; color: var(--accent); margin: 20px 0 12px; padding-bottom: 6px; border-bottom: 2px solid var(--border); }
+.turn-indicator {
+  background: var(--card);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.turn-indicator.white { color: #fff; }
+.turn-indicator.black { color: #aaa; }
+@media (max-width: 768px) {
+  .sidebar { max-width: 100%; }
+  .opening-layout { flex-direction: column; }
+  .chessboard-container { max-width: 100%; }
+}
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-2); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>♟️ Chess Repertoire Study Guide</h1>
+  <p>Minimum Memorization · Maximum Fun · High Success Rate</p>
+</header>
+
+<nav>
+  <button class="tab-btn active" data-tab="white">⚪ White Repertoire</button>
+  <button class="tab-btn" data-tab="black">⚫ Black Repertoire</button>
+  <button class="tab-btn" data-tab="concepts">💡 Core Concepts</button>
+  <button class="tab-btn" data-tab="study">📚 Study Guide</button>
+</nav>
+
+<!-- WHITE TAB -->
+<section id="white-tab" class="tab-content active">
+  <div class="opening-layout">
+    <div class="sidebar">
+      <h3>White Openings</h3>
+      <div id="white-openings"></div>
+    </div>
+    <div class="main-area">
+      <div class="board-wrapper">
+        <div class="chessboard-container">
+          <div class="chessboard" id="white-board"></div>
+        </div>
+        <div class="controls">
+          <button onclick="navMove('white','first')">⏮ Start</button>
+          <button onclick="navMove('white','prev')">◀ Prev</button>
+          <button onclick="navMove('white','next')">Next ▶</button>
+          <button onclick="navMove('white','last')">End ⏭</button>
+          <button onclick="flipBoard('white')">🔄 Flip</button>
+        </div>
+        <div class="turn-indicator" id="white-turn"></div>
+      </div>
+      <div class="info-panel">
+        <h3 id="white-title"></h3>
+        <div class="variations" id="white-variations"></div>
+        <div class="move-list" id="white-movelist"></div>
+        <div class="annotation" id="white-annotation"></div>
+        <div class="concept-box" id="white-concept"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BLACK TAB -->
+<section id="black-tab" class="tab-content">
+  <div class="opening-layout">
+    <div class="sidebar">
+      <h3>Black Openings</h3>
+      <div id="black-openings"></div>
+    </div>
+    <div class="main-area">
+      <div class="board-wrapper">
+        <div class="chessboard-container">
+          <div class="chessboard" id="black-board"></div>
+        </div>
+        <div class="controls">
+          <button onclick="navMove('black','first')">⏮ Start</button>
+          <button onclick="navMove('black','prev')">◀ Prev</button>
+          <button onclick="navMove('black','next')">Next ▶</button>
+          <button onclick="navMove('black','last')">End ⏭</button>
+          <button onclick="flipBoard('black')">🔄 Flip</button>
+        </div>
+        <div class="turn-indicator" id="black-turn"></div>
+      </div>
+      <div class="info-panel">
+        <h3 id="black-title"></h3>
+        <div class="variations" id="black-variations"></div>
+        <div class="move-list" id="black-movelist"></div>
+        <div class="annotation" id="black-annotation"></div>
+        <div class="concept-box" id="black-concept"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONCEPTS TAB -->
+<section id="concepts-tab" class="tab-content">
+  <div class="section-title">⚪ White Core Concepts</div>
+  <div class="concepts-grid" id="white-concepts-grid"></div>
+  <div class="section-title">⚫ Black Core Concepts</div>
+  <div class="concepts-grid" id="black-concepts-grid"></div>
+</section>
+
+<!-- STUDY TAB -->
+<section id="study-tab" class="tab-content">
+  <div id="study-steps"></div>
+  <div class="checklist">
+    <h3>✅ Success Checklist</h3>
+    <ul id="checklist-items"></ul>
+  </div>
+</section>
+
+<script>
+// ===================== PIECE UNICODE =====================
+const PIECES = { K:'♚', Q:'♛', R:'♜', B:'♝', N:'♞', P:'♟' };
+
+// ===================== BOARD LOGIC =====================
+function initBoard() {
+  return [
+    ['bR','bN','bB','bQ','bK','bB','bN','bR'],
+    ['bP','bP','bP','bP','bP','bP','bP','bP'],
+    [null,null,null,null,null,null,null,null],
+    [null,null,null,null,null,null,null,null],
+    [null,null,null,null,null,null,null,null],
+    [null,null,null,null,null,null,null,null],
+    ['wP','wP','wP','wP','wP','wP','wP','wP'],
+    ['wR','wN','wB','wQ','wK','wB','wN','wR']
+  ];
+}
+
+function sqToCoords(sq) {
+  const file = sq.charCodeAt(0) - 97;
+  const rank = parseInt(sq[1]);
+  return [8 - rank, file];
+}
+
+function applyMove(board, move) {
+  const nb = board.map(r => [...r]);
+  const [fr, fc] = sqToCoords(move.from);
+  const [tr, tc] = sqToCoords(move.to);
+  if (move.castle === 'kingside') {
+    nb[tr][tc] = nb[fr][fc]; nb[fr][fc] = null;
+    nb[tr][tc-1] = nb[tr][7]; nb[tr][7] = null;
+  } else if (move.castle === 'queenside') {
+    nb[tr][tc] = nb[fr][fc]; nb[fr][fc] = null;
+    nb[tr][tc+1] = nb[tr][0]; nb[tr][0] = null;
+  } else {
+    nb[tr][tc] = nb[fr][fc]; nb[fr][fc] = null;
+  }
+  return nb;
+}
+
+function getBoardAtMoves(moves, upToIndex) {
+  let board = initBoard();
+  for (let i = 0; i < upToIndex; i++) board = applyMove(board, moves[i]);
+  return board;
+}
+
+// ===================== RENDERING =====================
+function renderBoard(boardId, boardState, lastMove, orientation) {
+  const el = document.getElementById(boardId);
+  el.innerHTML = '';
+  const rows = orientation === 'white' ? [0,1,2,3,4,5,6,7] : [7,6,5,4,3,2,1,0];
+  const cols = orientation === 'white' ? [0,1,2,3,4,5,6,7] : [7,6,5,4,3,2,1,0];
+  for (const row of rows) {
+    for (const col of cols) {
+      const sq = document.createElement('div');
+      const isLight = (row + col) % 2 === 0;
+      sq.className = `square ${isLight ? 'light' : 'dark'}`;
+      if (lastMove) {
+        const [fr, fc] = sqToCoords(lastMove.from);
+        const [tr, tc] = sqToCoords(lastMove.to);
+        if ((row === fr && col === fc) || (row === tr && col === tc)) sq.classList.add('last-move');
+      }
+      const piece = boardState[row][col];
+      if (piece) {
+        const span = document.createElement('span');
+        span.className = `piece ${piece[0] === 'w' ? 'white-piece' : 'black-piece'}`;
+        span.textContent = PIECES[piece[1]];
+        sq.appendChild(span);
+      }
+      if ((orientation === 'white' && row === 7) || (orientation === 'black' && row === 0)) {
+        const f = document.createElement('span');
+        f.className = 'coord file';
+        f.textContent = String.fromCharCode(97 + col);
+        sq.appendChild(f);
+      }
+      if ((orientation === 'white' && col === 0) || (orientation === 'black' && col === 7)) {
+        const r = document.createElement('span');
+        r.className = 'coord rank';
+        r.textContent = 8 - row;
+        sq.appendChild(r);
+      }
+      el.appendChild(sq);
+    }
+  }
+}
+
+function renderMoveList(containerId, moves, currentIdx) {
+  const el = document.getElementById(containerId);
+  let html = '';
+  for (let i = 0; i < moves.length; i++) {
+    if (i % 2 === 0) html += `<span class="move-number">${Math.floor(i/2)+1}.</span>`;
+    const isCurrent = i === currentIdx - 1;
+    html += `<span class="move-cell ${isCurrent ? 'current' : ''}" data-idx="${i+1}" data-color="${containerId.includes('white')?'white':'black'}">${moves[i].n}</span>`;
+  }
+  el.innerHTML = html;
+  el.querySelectorAll('.move-cell').forEach(cell => {
+    cell.addEventListener('click', () => {
+      const color = cell.dataset.color;
+      const idx = parseInt(cell.dataset.idx);
+      state[color].moveIdx = idx;
+      updateView(color);
+    });
+  });
+}
+
+// ===================== STATE =====================
+const state = {
+  white: { openingId: null, variationId: null, moveIdx: 0, orientation: 'white' },
+  black: { openingId: null, variationId: null, moveIdx: 0, orientation: 'black' }
+};
+
+// ===================== REPERTOIRE DATA =====================
+const repertoire = {
+  white: [
+    {
+      id: 'scotch', name: 'Scotch Game', icon: '⚔️', shortDesc: 'vs 1...e5',
+      concept: 'Open lines fast. Trade the d4 pawn to ruin Black\'s pawn structure and activate your pieces. Target f7.',
+      variations: [
+        {
+          id: 'scotch-main', name: 'Main Line (4.Nxd4)',
+          desc: 'The core Scotch position. Open center, rapid development.',
+          moves: [
+            {from:'e2',to:'e4',n:'1.e4'},{from:'e7',to:'e5',n:'1...e5'},
+            {from:'g1',to:'f3',n:'2.Nf3'},{from:'b8',to:'c6',n:'2...Nc6'},
+            {from:'d2',to:'d4',n:'3.d4'},{from:'e5',to:'d4',n:'3...exd4'},
+            {from:'f3',to:'d4',n:'4.Nxd4'}
+          ],
+          notes: 'Open center, rapid development. Black must choose how to respond. From here, you can transition into the Mieses or the Classical line.'
+        },
+        {
+          id: 'scotch-mieses', name: 'Mieses (vs 4...Nf6)',
+          desc: 'Black counterattacks with Nf6. You trade your knight to wreck their pawns and push e5.',
+          moves: [
+            {from:'e2',to:'e4',n:'1.e4'},{from:'e7',to:'e5',n:'1...e5'},
+            {from:'g1',to:'f3',n:'2.Nf3'},{from:'b8',to:'c6',n:'2...Nc6'},
+            {from:'d2',to:'d4',n:'3.d4'},{from:'e5',to:'d4',n:'3...exd4'},
+            {from:'f3',to:'d4',n:'4.Nxd4'},{from:'g8',to:'f6',n:'4...Nf6'},
+            {from:'d4',to:'c6',n:'5.Nxc6'},{from:'b7',to:'c6',n:'5...bxc6'},
+            {from:'e4',to:'e5',n:'6.e5!',annotation:'KEY MOVE! Lock the center and gain a massive space advantage. Black\'s queen is forced to an awkward square.'},
+            {from:'d8',to:'h4',n:'6...Qh4'},{from:'d1',to:'d2',n:'7.Qd2'}
+          ],
+          notes: 'You give up your queen\'s knight to wreck their pawns and gain a massive tempo and space advantage. White has excellent winning chances.'
+        },
+        {
+          id: 'scotch-bc5', name: 'Classical (vs 4...Bc5)',
+          desc: 'Black develops actively. You pin down their bishop with Be3 and prepare queenside castling.',
+          moves: [
+            {from:'e2',to:'e4',n:'1.e4'},{from:'e7',to:'e5',n:'1...e5'},
+            {from:'g1',to:'f3',n:'2.Nf3'},{from:'b8',to:'c6',n:'2...Nc6'},
+            {from:'d2',to:'d4',n:'3.d4'},{from:'e5',to:'d4',n:'3...exd4'},
+            {from:'f3',to:'d4',n:'4.Nxd4'},{from:'f8',to:'c5',n:'4...Bc5'},
+            {from:'c1',to:'e3',n:'5.Be3',annotation:'KEY MOVE! Challenge the bishop immediately. You will play Qd2 and O-O-O, launching a fierce queenside attack.'}
+          ],
+          notes: 'You will play Qd2 and O-O-O, launching a fierce queenside attack. The position becomes very sharp.'
+        },
+        {
+          id: 'scotch-gambit', name: 'Gambit Option (4.Bc4)',
+          desc: 'For pure fun — sacrifice a pawn for rapid development and attacking chances.',
+          moves: [
+            {from:'e2',to:'e4',n:'1.e4'},{from:'e7',to:'e5',n:'1...e5'},
+            {from:'g1',to:'f3',n:'2.Nf3'},{from:'b8',to:'c6',n:'2...Nc6'},
+            {from:'d2',to:'d4',n:'3.d4'},{from:'e5',to:'d4',n:'3...exd4'},
+            {from:'f1',to:'c4',n:'4.Bc4',annotation:'GAMBIT! Give up a pawn for rapid development and an attack on f7.'},
+            {from:'f8',to:'c5',n:'4...Bc5'},{from:'c2',to:'c3',n:'5.c3!',annotation:'Göring Gambit. Offer a second pawn to build a massive center.'}
+          ],
+          notes: 'If they take the second pawn, you play Qb3 or Nxd4 with a fierce attack. Great for blitz and rapid.'
+        }
+      ]
+    },
+    {
+      id: 'grandprix', name: 'Grand Prix Attack', icon: '🚀', shortDesc: 'vs 1...c5 (Sicilian)',
+      concept: 'Avoid Open Sicilian theory. Set up a big center with e4 and d3, then launch an early f4-f5 to crash Black\'s kingside.',
+      variations: [
+        {
+          id: 'gp-main', name: 'Main Setup (3.f4)',
+          desc: 'The core Grand Prix position. Prepare f4 and develop aggressively.',
+          moves: [
+            {from:'e2',to:'e4',n:'1.e4'},{from:'c7',to:'c5',n:'1...c5'},
+            {from:'b1',to:'c3',n:'2.Nc3'},{from:'b8',to:'c6',n:'2...Nc6'},
+            {from:'f2',to:'f4',n:'3.f4',annotation:'KEY MOVE! The Grand Prix Attack. You will follow up with Nf3, d3, and either f5 or g3/Bg2.'}
+          ],
+          notes: 'The f5 pawn break is your primary weapon. Your goal is to play f5, push f6, drop a knight into e5 or g5, and checkmate.'
+        },
+        {
+          id: 'gp-vs-g6', name: 'vs 3...g6',
+          desc: 'Black fianchettos. You pin the knight with Bb5 — highly annoying for Sicilian players.',
+          moves: [
+            {from:'e2',to:'e4',n:'1.e4'},{from:'c7',to:'c5',n:'1...c5'},
+            {from:'b1',to:'c3',n:'2.Nc3'},{from:'b8',to:'c6',n:'2...Nc6'},
+            {from:'f2',to:'f4',n:'3.f4'},{from:'g7',to:'g6',n:'3...g6'},
+            {from:'g1',to:'f3',n:'4.Nf3'},{from:'f8',to:'g7',n:'4...Bg7'},
+            {from:'f1',to:'b5',n:'5.Bb5!',annotation:'KEY MOVE! The Anti-Grunfeld setup. Pin the knight and prepare Bxc6 followed by d4 or e5. Very annoying for Black.'}
+          ],
+          notes: 'You pin the knight and prepare Bxc6 followed by d4 or e5. Black struggles to coordinate.'
+        },
+        {
+          id: 'gp-vs-e6', name: 'vs 3...e6',
+          desc: 'Black plays solid. You strike with f5! to lock the center and storm the kingside.',
+          moves: [
+            {from:'e2',to:'e4',n:'1.e4'},{from:'c7',to:'c5',n:'1...c5'},
+            {from:'b1',to:'c3',n:'2.Nc3'},{from:'b8',to:'c6',n:'2...Nc6'},
+            {from:'f2',to:'f4',n:'3.f4'},{from:'e7',to:'e6',n:'3...e6'},
+            {from:'g1',to:'f3',n:'4.Nf3'},{from:'d7',to:'d5',n:'4...d5'},
+            {from:'f4',to:'f5',n:'5.f5!',annotation:'KEY MOVE! Lock the center and storm the kingside. A thematic break that opens the f-file for your rook.'}
+          ],
+          notes: 'A thematic break. You open the f-file for your rook and gain massive space on the kingside.'
+        }
+      ]
+    },
+    {
+      id: 'french-advance', name: 'French Advance', icon: '🛡️', shortDesc: 'vs 1...e6',
+      concept: 'Grab space immediately with e5, locking the center. Black\'s light-squared bishop is terrible. Play a kingside storm with g4, h4.',
+      variations: [
+        {
+          id: 'fr-adv', name: 'Advance Variation (3.e5)',
+          desc: 'Lock the center and suffocate Black. Their light-squared bishop is trapped.',
+          moves: [
+            {from:'e2',to:'e4',n:'1.e4'},{from:'e7',to:'e6',n:'1...e6'},
+            {from:'d2',to:'d4',n:'2.d4'},{from:'d7',to:'d5',n:'2...d5'},
+            {from:'e4',to:'e5',n:'3.e5',annotation:'KEY MOVE! Grab space and lock the center. Black\'s light-squared bishop is now terrible.'},
+            {from:'c7',to:'c5',n:'3...c5'},{from:'c2',to:'c3',n:'4.c3'},
+            {from:'b8',to:'c6',n:'4...Nc6'},{from:'g1',to:'f3',n:'5.Nf3'},
+            {from:'d8',to:'b6',n:'5...Qb6'},{from:'f1',to:'e2',n:'6.Be2'}
+          ],
+          notes: 'The center is locked. Play Ne1, Nd3, g4, h4, Rg1. You literally throw your pawns at Black\'s king. It requires zero theory, just aggression.'
+        }
+      ]
+    },
+    {
+      id: 'caro-advance', name: 'Caro-Kann Advance', icon: '🏰', shortDesc: 'vs 1...c6',
+      concept: 'Grab space with e5. You get a spatial edge while Black tries to develop. Play a similar kingside storm.',
+      variations: [
+        {
+          id: 'ck-adv', name: 'Advance Variation (3.e5)',
+          desc: 'Gain space and lock the center. Black\'s bishop gets active but you get a lasting spatial edge.',
+          moves: [
+            {from:'e2',to:'e4',n:'1.e4'},{from:'c7',to:'c6',n:'1...c6'},
+            {from:'d2',to:'d4',n:'2.d4'},{from:'d7',to:'d5',n:'2...d5'},
+            {from:'e4',to:'e5',n:'3.e5',annotation:'KEY MOVE! Gain space and lock the center. Similar to the French Advance but Black\'s bishop isn\'t as bad.'},
+            {from:'c8',to:'f5',n:'3...Bf5'},{from:'g1',to:'f3',n:'4.Nf3'},
+            {from:'e7',to:'e6',n:'4...e6'},{from:'f1',to:'e2',n:'5.Be2'},
+            {from:'c6',to:'c5',n:'5...c5'},{from:'c1',to:'e3',n:'6.Be3'}
+          ],
+          notes: 'You get a spatial edge. Play Be3, Nd2, and prepare to attack on the kingside or queenside depending on Black\'s setup.'
+        }
+      ]
+    },
+    {
+      id: 'pirc-austrian', name: 'Pirc Austrian Attack', icon: '⚡', shortDesc: 'vs 1...d6 / Pirc',
+      concept: 'Punish hyper-modern play by grabbing a massive center and launching the f-pawn. Do not let Black sit comfortably.',
+      variations: [
+        {
+          id: 'pirc-aust', name: 'Austrian Attack (4.f4)',
+          desc: 'Build a giant pawn wall (e4, d4, f4) and use it to suffocate Black.',
+          moves: [
+            {from:'e2',to:'e4',n:'1.e4'},{from:'d7',to:'d6',n:'1...d6'},
+            {from:'d2',to:'d4',n:'2.d4'},{from:'g8',to:'f6',n:'2...Nf6'},
+            {from:'b1',to:'c3',n:'3.Nc3'},{from:'g7',to:'g6',n:'3...g6'},
+            {from:'f2',to:'f4',n:'4.f4',annotation:'KEY MOVE! Build a massive center and prepare to push e5 to kick the knight and open the f-file. Your space advantage guarantees you get the first attack.'}
+          ],
+          notes: 'Follow up with Nf3, Bd3, O-O, and push e5 or f5. Your space advantage guarantees you get the first attack.'
+        }
+      ]
+    },
+    {
+      id: 'modern-150', name: 'Modern 150 Attack', icon: '🎯', shortDesc: 'vs 1...g6 / Modern',
+      concept: 'When Black plays a passive Modern setup without ...Nf6, castle long and throw h4-h5 at their face.',
+      variations: [
+        {
+          id: 'mod-150', name: '150 Attack (Be3, Qd2, h4)',
+          desc: 'Set up the brutal h4-h5 pawn sacrifice to rip open the h-file.',
+          moves: [
+            {from:'e2',to:'e4',n:'1.e4'},{from:'g7',to:'g6',n:'1...g6'},
+            {from:'d2',to:'d4',n:'2.d4'},{from:'f8',to:'g7',n:'2...Bg7'},
+            {from:'b1',to:'c3',n:'3.Nc3'},{from:'d7',to:'d6',n:'3...d6'},
+            {from:'c1',to:'e3',n:'4.Be3'},{from:'a7',to:'a6',n:'4...a6'},
+            {from:'d1',to:'d2',n:'5.Qd2',annotation:'KEY MOVE! Prepare to castle long and launch the h4-h5 attack. This requires zero theory and is terrifying for Black.'}
+          ],
+          notes: 'Castle long, push h4-h5. If Black doesn\'t take, you sacrifice hxg6 to rip open the h-file. Terrifying for Black.'
+        }
+      ]
+    }
+  ],
+  black: [
+    {
+      id: 'pirc', name: 'Pirc Defense', icon: '🐍', shortDesc: 'vs 1.e4',
+      concept: 'Hyper-modern warfare. Let White build a big center. Fianchetto your bishop to g7, control the long diagonal, and strike with ...c5 or ...e5.',
+      variations: [
+        {
+          id: 'pirc-main', name: 'Main Setup',
+          desc: 'The universal fianchetto skeleton against 1.e4.',
+          moves: [
+            {from:'e2',to:'e4',n:'1.e4'},{from:'d7',to:'d6',n:'1...d6'},
+            {from:'d2',to:'d4',n:'2.d4'},{from:'g8',to:'f6',n:'2...Nf6'},
+            {from:'b1',to:'c3',n:'3.Nc3'},{from:'g7',to:'g6',n:'3...g6'},
+            {from:'g1',to:'f3',n:'4.Nf3'},{from:'f8',to:'g7',n:'4...Bg7'},
+            {from:'f1',to:'e2',n:'5.Be2'},{from:'e8',to:'g8',n:'5...O-O',castle:'kingside'}
+          ],
+          notes: 'Your g7 bishop is a sniper. You play with a "wait and see" approach. Never fear a big white center — a center that is too big is a target.'
+        },
+        {
+          id: 'pirc-austrian', name: 'vs Austrian Attack (4.f4)',
+          desc: 'White goes for the throat. You must counter with ...c5! to blow up the center.',
+          moves: [
+            {from:'e2',to:'e4',n:'1.e4'},{from:'d7',to:'d6',n:'1...d6'},
+            {from:'d2',to:'d4',n:'2.d4'},{from:'g8',to:'f6',n:'2...Nf6'},
+            {from:'b1',to:'c3',n:'3.Nc3'},{from:'g7',to:'g6',n:'3...g6'},
+            {from:'f2',to:'f4',n:'4.f4'},{from:'f8',to:'g7',n:'4...Bg7'},
+            {from:'g1',to:'f3',n:'5.Nf3'},{from:'e8',to:'g8',n:'5...O-O',castle:'kingside'},
+            {from:'f1',to:'e2',n:'6.Be2'},{from:'c7',to:'c5',n:'6...c5!',annotation:'KEY MOVE! Strike the center before White can consolidate. You must blow up their d4 pawn.'}
+          ],
+          notes: 'You must blow up their d4 pawn. If White plays dxc5, you play dxc5 and your position is excellent.'
+        },
+        {
+          id: 'pirc-classical', name: 'vs Classical (4.Nf3)',
+          desc: 'White plays solidly. You play ...Nc6, ...a6, and prepare ...e5.',
+          moves: [
+            {from:'e2',to:'e4',n:'1.e4'},{from:'d7',to:'d6',n:'1...d6'},
+            {from:'d2',to:'d4',n:'2.d4'},{from:'g8',to:'f6',n:'2...Nf6'},
+            {from:'b1',to:'c3',n:'3.Nc3'},{from:'g7',to:'g6',n:'3...g6'},
+            {from:'g1',to:'f3',n:'4.Nf3'},{from:'f8',to:'g7',n:'4...Bg7'},
+            {from:'f1',to:'e2',n:'5.Be2'},{from:'e8',to:'g8',n:'5...O-O',castle:'kingside'},
+            {from:'e1',to:'g1',n:'6.O-O',castle:'kingside'},{from:'b8',to:'c6',n:'6...Nc6'},
+            {from:'a2',to:'a4',n:'7.a4'},{from:'a7',to:'a6',n:'7...a6'},
+            {from:'d1',to:'d2',n:'8.Qd2'},{from:'e7',to:'e5',n:'8...e5!',annotation:'KEY MOVE! Strike the center now that White\'s pieces are committed. Look for the exact moment White moves a piece that stops guarding the center.'}
+          ],
+          notes: 'Strike the center when White\'s pieces are committed. Look for the exact moment White moves a piece that stops guarding e4 or d4.'
+        },
+        {
+          id: 'pirc-150', name: 'vs 150 Attack (4.Be3)',
+          desc: 'White plans Bh6 and long castling. You play ...Nc6 and ...a6, preparing ...b5.',
+          moves: [
+            {from:'e2',to:'e4',n:'1.e4'},{from:'d7',to:'d6',n:'1...d6'},
+            {from:'d2',to:'d4',n:'2.d4'},{from:'g8',to:'f6',n:'2...Nf6'},
+            {from:'b1',to:'c3',n:'3.Nc3'},{from:'g7',to:'g6',n:'3...g6'},
+            {from:'c1',to:'e3',n:'4.Be3'},{from:'f8',to:'g7',n:'4...Bg7'},
+            {from:'d1',to:'d2',n:'5.Qd2'},{from:'e8',to:'g8',n:'5...O-O',castle:'kingside'},
+            {from:'f2',to:'f3',n:'6.f3'},{from:'b8',to:'c6',n:'6...Nc6'},
+            {from:'g2',to:'g4',n:'7.g4'},{from:'a7',to:'a6',n:'7...a6',annotation:'Prepare ...b5 to attack the queenside. White\'s center is overextended.'}
+          ],
+          notes: 'Prepare ...b5 to attack the queenside. White\'s center is overextended and their king is vulnerable.'
+        }
+      ]
+    },
+    {
+      id: 'kid', name: 'King\'s Indian Defense', icon: '🦔', shortDesc: 'vs 1.d4 / 1.c4 / 1.Nf3',
+      concept: 'The "Porcupine." Give White the center, bury your bishop on g7, and prepare a massive pawn storm with ...f5, ...g5, ...h5. White attacks your queenside; you attack their king.',
+      variations: [
+        {
+          id: 'kid-main', name: 'Mar del Plata (Main Line)',
+          desc: 'The most critical and most fun line. Close the center and throw everything at the king.',
+          moves: [
+            {from:'d2',to:'d4',n:'1.d4'},{from:'g8',to:'f6',n:'1...Nf6'},
+            {from:'c2',to:'c4',n:'2.c4'},{from:'g7',to:'g6',n:'2...g6'},
+            {from:'b1',to:'c3',n:'3.Nc3'},{from:'f8',to:'g7',n:'3...Bg7'},
+            {from:'e2',to:'e4',n:'4.e4'},{from:'d7',to:'d6',n:'4...d6'},
+            {from:'g1',to:'f3',n:'5.Nf3'},{from:'e8',to:'g8',n:'5...O-O',castle:'kingside'},
+            {from:'f1',to:'e2',n:'6.Be2'},{from:'e7',to:'e5',n:'6...e5'},
+            {from:'e1',to:'g1',n:'7.O-O',castle:'kingside'},{from:'b8',to:'c6',n:'7...Nc6'},
+            {from:'d4',to:'d5',n:'8.d5'},{from:'c6',to:'e7',n:'8...Ne7'},
+            {from:'f3',to:'e1',n:'9.Ne1'},{from:'e7',to:'d7',n:'9...Nd7'},
+            {from:'f2',to:'f3',n:'10.f3'},{from:'f7',to:'f5',n:'10...f5!',annotation:'KEY MOVE! Start the kingside pawn storm. In the KID, your attack is naturally faster than White\'s queenside attack.'},
+            {from:'e4',to:'f5',n:'11.exf5'},{from:'g6',to:'f5',n:'11...gxf5',annotation:'Open the g-file for your rooks. Follow up with ...g5, ...Nf6, ...h5.'}
+          ],
+          notes: 'Follow up with ...g5, ...Nf6, ...h5. Do not be afraid to sacrifice a piece to open the h-file or g-file. A successful pawn storm almost always leads to checkmate.'
+        },
+        {
+          id: 'kid-fianchetto', name: 'vs Fianchetto System',
+          desc: 'White plays g3 and Bg2. The kingside attack is slower, so you build queenside pressure.',
+          moves: [
+            {from:'d2',to:'d4',n:'1.d4'},{from:'g8',to:'f6',n:'1...Nf6'},
+            {from:'c2',to:'c4',n:'2.c4'},{from:'g7',to:'g6',n:'2...g6'},
+            {from:'b1',to:'c3',n:'3.Nc3'},{from:'f8',to:'g7',n:'3...Bg7'},
+            {from:'g1',to:'f3',n:'4.Nf3'},{from:'d7',to:'d6',n:'4...d6'},
+            {from:'g2',to:'g3',n:'5.g3'},{from:'e8',to:'g8',n:'5...O-O',castle:'kingside'},
+            {from:'f1',to:'g2',n:'6.Bg2'},{from:'e7',to:'e5',n:'6...e5'},
+            {from:'e1',to:'g1',n:'7.O-O',castle:'kingside'},{from:'b8',to:'c6',n:'7...Nc6'},
+            {from:'d4',to:'d5',n:'8.d5'},{from:'c6',to:'e7',n:'8...Ne7'}
+          ],
+          notes: 'Here, the kingside attack is slower. You play ...a5, ...Rb8, ...b5 to build massive queenside pressure.'
+        },
+        {
+          id: 'kid-samisch', name: 'vs Sämisch (5.f3)',
+          desc: 'White plays f3 to support the center. You play ...e5 and prepare ...c5 or ...f5.',
+          moves: [
+            {from:'d2',to:'d4',n:'1.d4'},{from:'g8',to:'f6',n:'1...Nf6'},
+            {from:'c2',to:'c4',n:'2.c4'},{from:'g7',to:'g6',n:'2...g6'},
+            {from:'b1',to:'c3',n:'3.Nc3'},{from:'f8',to:'g7',n:'3...Bg7'},
+            {from:'e2',to:'e4',n:'4.e4'},{from:'d7',to:'d6',n:'4...d6'},
+            {from:'f2',to:'f3',n:'5.f3'},{from:'e8',to:'g8',n:'5...O-O',castle:'kingside'},
+            {from:'c1',to:'e3',n:'6.Be3'},{from:'e7',to:'e5',n:'6...e5'}
+          ],
+          notes: 'Play 7...Nc6, 8...a6, and prepare ...b5 or ...Nh5 to attack the center. The Sämisch is sharp but Black has good counterplay.'
+        }
+      ]
+    },
+    {
+      id: 'anti-london', name: 'London Buster', icon: '💥', shortDesc: 'vs London System / Torre / Colle',
+      concept: 'System openings hate early pressure on d4. Set up your fianchetto, strike at d4 with ...c5, and put your queen on b6.',
+      variations: [
+        {
+          id: 'london-bust', name: 'vs London System (2.Bf4)',
+          desc: 'Set up the fianchetto and hit d4 with ...c5 and ...Qb6.',
+          moves: [
+            {from:'d2',to:'d4',n:'1.d4'},{from:'g8',to:'f6',n:'1...Nf6'},
+            {from:'c1',to:'f4',n:'2.Bf4'},{from:'g7',to:'g6',n:'2...g6'},
+            {from:'g1',to:'f3',n:'3.Nf3'},{from:'f8',to:'g7',n:'3...Bg7'},
+            {from:'e2',to:'e3',n:'4.e3'},{from:'e8',to:'g8',n:'4...O-O',castle:'kingside'},
+            {from:'f1',to:'e2',n:'5.Be2'},{from:'d7',to:'d6',n:'5...d6'},
+            {from:'e1',to:'g1',n:'6.O-O',castle:'kingside'},{from:'c7',to:'c5',n:'6...c5!',annotation:'KEY MOVE! Strike at d4. The London cannot handle early pressure on d4. Your g7 bishop will rule the long diagonal.'}
+          ],
+          notes: 'Put massive pressure on the d4 pawn. If White defends with c3, their center becomes permanently weak. If they capture on c5, you recapture with your d-pawn and dominate the light squares.'
+        }
+      ]
+    }
+  ],
+  concepts: {
+    white: [
+      {
+        title: 'The "Lock and Storm" Concept',
+        applies: 'French Advance, Caro-Kann Advance, Grand Prix vs ...e6',
+        idea: 'Push your e-pawn to e5 (or f-pawn to f5) to permanently lock the center.',
+        execution: 'Once the center is locked, the board is divided. You don\'t care what Black does on the queenside. You will play Ne1, Nd3, g4, h4, Rg1, and crash through on the kingside.',
+        rule: 'A locked center means pawn storms are 100% safe. Throw your pawns forward; they cannot be captured easily because the center is frozen.'
+      },
+      {
+        title: 'The "Open & Activate" Concept',
+        applies: 'Scotch Game, Scotch Gambit',
+        idea: 'Trade your central d-pawn for Black\'s e-pawn to instantly open lines for your bishops and queen.',
+        execution: 'Do not cling to material in the gambit lines. If you sacrifice a pawn, you must develop a piece or open a line for the queen with every single move.',
+        rule: 'Target f7. In open positions, the f7 square (only defended by the Black king) is the weakest point on the board. Bring your queen and bishop to aim at it.'
+      },
+      {
+        title: 'The "Massive Center + f-pawn" Concept',
+        applies: 'Pirc Austrian Attack, Modern 150 Attack',
+        idea: 'Punish Black for fianchettoing. Build a giant pawn wall (e4, d4, f4) and use it to suffocate them.',
+        execution: 'If they play ...Nf6 early, push f4 and follow up with e5 to kick the knight and open the f-file. If they play a passive Modern, put your bishop on e3, queen on d2, castle long, and push h4-h5 to sacrifice and rip open the h-file.',
+        rule: 'Do not let Black sit comfortably. Your space advantage means your attack will always be faster than their counterattack.'
+      }
+    ],
+    black: [
+      {
+        title: 'The "Universal Fianchetto" Concept',
+        applies: 'Pirc, KID, Anti-London',
+        idea: 'Play ...d6, ...Nf6, ...g6, ...Bg7, ...O-O against everything.',
+        execution: 'Your g7 bishop is a sniper. It aimlessly points at White\'s center. You play with a "wait and see" approach, letting White commit their pawns and pieces before you strike.',
+        rule: 'Never fear a big white center. A center that is too big is a target. Your pieces are perfectly placed to tear it down.'
+      },
+      {
+        title: 'The "Trigger Break" Concept',
+        applies: 'Pirc and KID center strikes',
+        idea: 'You must break White\'s center at the exact right moment with either ...c5 or ...e5.',
+        execution: 'If White plays an early f4 (Austrian/Sämisch), you play ...c5 to blow up their d4 pawn. If White plays solidly (Classical Pirc/KID), you play ...e5 to lock the center and start your own attack.',
+        rule: 'The "Trigger." You must strike immediately when White moves a piece that stops guarding the center. If White plays a knight to the rim or pushes a kingside pawn, that is your green light to play ...c5 or ...e5.'
+      },
+      {
+        title: 'The "Kingside Sacrifice" Concept',
+        applies: 'KID Mar del Plata, Pirc Austrian',
+        idea: 'In closed, locked positions, Black\'s attack on the kingside is naturally faster than White\'s attack on the queenside.',
+        execution: 'You play ...f5, and if White captures (exf5), you recapture with your g-pawn (gxf5). Now your g-file is open. You push ...g5, ...h5, and swing your rooks to the g- and h-files.',
+        rule: 'Do not be afraid to sacrifice a piece to open the h-file or g-file. In the King\'s Indian, a successful pawn storm (...h5, ...h4) almost always leads to a checkmate or a winning attack.'
+      },
+      {
+        title: 'The "London Buster" Concept',
+        applies: 'vs London System, Torre, Colle',
+        idea: 'System openings (where White just develops blindly) are vulnerable to early pressure on the d4 pawn.',
+        execution: 'Set up your normal fianchetto, but instead of ...e5, you play ...c5 and bring your queen to b6. You put massive pressure on the d4 pawn.',
+        rule: 'Make White make a choice. If they defend d4 with c3, their center becomes permanently weak. If they capture on c5, you recapture with your d-pawn and dominate the light squares. Your g7 bishop will rule the long diagonal.'
+      }
+    ]
+  },
+  study: [
+    { title: 'The "8-Move" Rule', desc: 'For each line in this guide, go to an opening explorer (Lichess or Chess.com) and play the moves out until move 8. Stop looking at theory after move 8. After move 8, you are playing chess based on the Core Concepts.' },
+    { title: 'Master the Pawn Breaks', desc: 'Your entire repertoire relies on 5 pawn moves: White Scotch → e5; White Grand Prix → f5; White Advance → g4/h4; Black Pirc/KID → ...c5 or ...e5; Black vs London → ...c5. If you know when to play these pawn breaks, you don\'t need to memorize knight maneuvers.' },
+    { title: 'Play Rapid Games (10+5 or 15+10)', desc: 'Use only these moves. When an opponent deviates from your cheat sheet, don\'t panic—just recall the Core Concept (e.g., "I\'m White in the Advance, I need to lock the center and attack").' },
+    { title: 'Trap-Driven Memorization', desc: 'Only add a new move to your memory if you lost a game because you didn\'t know it. If you win or draw, the concept was enough. Build your tree of variations organically.' }
+  ],
+  checklist: [
+    'White vs 1...e5 → Scotch Game (Attack f7, open lines)',
+    'White vs 1...c5 → Grand Prix Attack (f4-f5 storm)',
+    'White vs 1...e6 → French Advance (Lock and Storm)',
+    'White vs 1...c6 → Caro-Kann Advance (Lock and Storm)',
+    'White vs 1...d6/g6 → Austrian / 150 Attack (Massive center + f/h storm)',
+    'Black vs 1.e4 → Pirc Defense (Hypermodern, hit center with c5/e5)',
+    'Black vs 1.d4 → King\'s Indian Defense (Hypermodern, storm king with f5/g5)',
+    'Black vs London/Torre → London Buster (Fianchetto + ...c5)',
+    'Method → Learn pawn structures → Watch master games → Play rapid → Memorize only traps'
+  ]
+};
+
+// ===================== INIT & RENDER =====================
+function init() {
+  // Set default selections
+  state.white.openingId = repertoire.white[0].id;
+  state.white.variationId = repertoire.white[0].variations[0].id;
+  state.black.openingId = repertoire.black[0].id;
+  state.black.variationId = repertoire.black[0].variations[0].id;
+
+  buildSidebar('white');
+  buildSidebar('black');
+  buildConcepts();
+  buildStudyGuide();
+  updateView('white');
+  updateView('black');
+
+  // Tab switching
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`${btn.dataset.tab}-tab`).classList.add('active');
+    });
+  });
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
+    if (activeTab !== 'white' && activeTab !== 'black') return;
+    if (e.key === 'ArrowRight') navMove(activeTab, 'next');
+    if (e.key === 'ArrowLeft') navMove(activeTab, 'prev');
+    if (e.key === 'Home') navMove(activeTab, 'first');
+    if (e.key === 'End') navMove(activeTab, 'last');
+  });
+}
+
+function buildSidebar(color) {
+  const container = document.getElementById(`${color}-openings`);
+  container.innerHTML = '';
+  repertoire[color].forEach(op => {
+    const btn = document.createElement('button');
+    btn.className = 'opening-btn';
+    if (state[color].openingId === op.id) btn.classList.add('active');
+    btn.innerHTML = `<span class="icon">${op.icon}</span> ${op.name}<span class="desc">${op.shortDesc}</span>`;
+    btn.addEventListener('click', () => {
+      state[color].openingId = op.id;
+      state[color].variationId = op.variations[0].id;
+      state[color].moveIdx = 0;
+      buildSidebar(color);
+      updateView(color);
+    });
+    container.appendChild(btn);
+  });
+}
+
+function buildConcepts() {
+  const wGrid = document.getElementById('white-concepts-grid');
+  const bGrid = document.getElementById('black-concepts-grid');
+  wGrid.innerHTML = '';
+  bGrid.innerHTML = '';
+  repertoire.concepts.white.forEach(c => wGrid.appendChild(makeConceptCard(c)));
+  repertoire.concepts.black.forEach(c => bGrid.appendChild(makeConceptCard(c)));
+}
+
+function makeConceptCard(c) {
+  const div = document.createElement('div');
+  div.className = 'concept-card';
+  div.innerHTML = `
+    <h3>${c.title}</h3>
+    <div class="applies">📌 ${c.applies}</div>
+    <div class="section"><span class="label">The Idea</span><p>${c.idea}</p></div>
+    <div class="section"><span class="label">Execution</span><p>${c.execution}</p></div>
+    <div class="rule"><strong>⚙️ Golden Rule:</strong> ${c.rule}</div>
+  `;
+  return div;
+}
+
+function buildStudyGuide() {
+  const container = document.getElementById('study-steps');
+  container.innerHTML = '';
+  repertoire.study.forEach((step, i) => {
+    const div = document.createElement('div');
+    div.className = 'study-step';
+    div.innerHTML = `<div class="step-num">${i+1}</div><div><h3>${step.title}</h3><p>${step.desc}</p></div>`;
+    container.appendChild(div);
+  });
+  const checklist = document.getElementById('checklist-items');
+  checklist.innerHTML = '';
+  repertoire.checklist.forEach(item => {
+    const li = document.createElement('li');
+    li.textContent = item;
+    checklist.appendChild(li);
+  });
+}
+
+function getOpening(color, id) {
+  return repertoire[color].find(o => o.id === id);
+}
+
+function getVariation(color, opId, varId) {
+  const op = getOpening(color, opId);
+  return op.variations.find(v => v.id === varId);
+}
+
+function updateView(color) {
+  const s = state[color];
+  const op = getOpening(color, s.openingId);
+  const variation = getVariation(color, s.openingId, s.variationId);
+  const moves = variation.moves;
+  const board = getBoardAtMoves(moves, s.moveIdx);
+  const lastMove = s.moveIdx > 0 ? moves[s.moveIdx - 1] : null;
+
+  renderBoard(`${color}-board`, board, lastMove, s.orientation);
+  renderMoveList(`${color}-movelist`, moves, s.moveIdx);
+
+  // Title
+  document.getElementById(`${color}-title`).textContent = `${op.icon} ${op.name} — ${variation.name}`;
+
+  // Variations
+  const varContainer = document.getElementById(`${color}-variations`);
+  varContainer.innerHTML = '';
+  op.variations.forEach(v => {
+    const btn = document.createElement('button');
+    btn.className = 'variation-btn';
+    if (v.id === s.variationId) btn.classList.add('active');
+    btn.textContent = v.name;
+    btn.addEventListener('click', () => {
+      s.variationId = v.id;
+      s.moveIdx = 0;
+      updateView(color);
+    });
+    varContainer.appendChild(btn);
+  });
+
+  // Annotation
+  const annotEl = document.getElementById(`${color}-annotation`);
+  if (s.moveIdx > 0 && moves[s.moveIdx - 1].annotation) {
+    annotEl.innerHTML = `<strong>💡 ${moves[s.moveIdx - 1].n}:</strong> ${moves[s.moveIdx - 1].annotation}`;
+    annotEl.style.display = 'block';
+  } else {
+    annotEl.innerHTML = `<strong>📝 Notes:</strong> ${variation.notes}`;
+    annotEl.style.display = 'block';
+  }
+
+  // Concept
+  document.getElementById(`${color}-concept`).innerHTML = `<strong>🎯 Core Concept:</strong> ${op.concept}`;
+
+  // Turn indicator
+  const turnEl = document.getElementById(`${color}-turn`);
+  const isWhiteTurn = s.moveIdx % 2 === 0;
+  turnEl.className = `turn-indicator ${isWhiteTurn ? 'white' : 'black'}`;
+  turnEl.textContent = isWhiteTurn ? '⚪ White to move' : '⚫ Black to move';
+}
+
+function navMove(color, dir) {
+  const s = state[color];
+  const variation = getVariation(color, s.openingId, s.variationId);
+  const totalMoves = variation.moves.length;
+  if (dir === 'first') s.moveIdx = 0;
+  else if (dir === 'last') s.moveIdx = totalMoves;
+  else if (dir === 'prev') s.moveIdx = Math.max(0, s.moveIdx - 1);
+  else if (dir === 'next') s.moveIdx = Math.min(totalMoves, s.moveIdx + 1);
+  updateView(color);
+}
+
+function flipBoard(color) {
+  state[color].orientation = state[color].orientation === 'white' ? 'black' : 'white';
+  updateView(color);
+}
+
+init();
+</script>
+</body>
+</html>
